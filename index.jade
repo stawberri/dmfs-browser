@@ -1,0 +1,17 @@
+doctype html
+html
+  head
+    title base65536-saver
+  body
+    form#main-form
+      input(type='file')#file-picker
+      br
+      textarea#compressed-text
+      br
+      button#file-to-text Convert file to text
+      br
+      button#text-to-file Download file
+    script(src='js/base65536.min.js')
+    script(src='js/buffer.min.js')
+    script(src='https://code.jquery.com/jquery-2.2.0.min.js')
+    script(src='js/script.js')
