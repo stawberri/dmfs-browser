@@ -8,10 +8,14 @@ html
       br
       textarea#compressed-text
       br
+      label
+        input(type='checkbox')#use-base64
+        | Use Base64
+      br
       button#file-to-text Convert file to text
       br
       button#text-to-file Download file
     script(src='js/base65536.min.js')
     script(src='js/buffer.min.js')
     script(src='https://code.jquery.com/jquery-2.2.0.min.js')
-    script(src='js/script.js')
+    script(src='js/script.js?_=1')

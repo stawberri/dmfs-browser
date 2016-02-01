@@ -16,6 +16,11 @@ $ \#text-to-file .click ->
 
   content = json-object.ct
   content |>= Base65536.decode
+
+  if $ \#use-base64 .is \:checked
+    content .= to-string!
+    content |>= -> new Buffer it, \base64
+
   content |>= -> new Uint8Array it
 
   blob = new Blob do
