@@ -53,8 +53,6 @@ $ \#text-to-file .click ->
 
     object-url = URL.create-object-URL blob
 
-    console.log object-url
-
     $ \<a>
       ..attr do
         href: object-url
@@ -64,24 +62,33 @@ $ \#text-to-file .click ->
 $ \#file-to-text .click ->
   it.prevent-default!
 
-  file = $ \#file-picker .0.files.0
-  return unless file?
+  files = $ \#file-picker .0.files
+  return unless files.length
 
-  file-reader = new FileReader!
-  file-reader.add-event-listener \loadend ->
-    data = new Buffer new Uint8Array file-reader.result
+  $ \#compressed-text .val 'Processing~'
 
-    if $ \#use-base64 .is \:checked
-      data .= to-string \base64
-      data |>= -> new Buffer it
+  $.when ...do
+    for let file in files
+      defer = $.Deferred!
 
-    data |>= Base65536.encode
+      file-reader = new FileReader!
+      file-reader.add-event-listener \loadend ->
+        data = new Buffer new Uint8Array file-reader.result
 
-    output =
-      fn: file.name
-      pt: 0
-      ct: data
+        if $ \#use-base64 .is \:checked
+          data .= to-string \base64
+          data |>= -> new Buffer it
 
-    output |>= JSON.stringify
-    $ \#compressed-text .val "!!DMFS#{output}"
-  file-reader.read-as-array-buffer file
+        data |>= Base65536.encode
+
+        output =
+          fn: file.name
+          pt: 0
+          ct: data
+
+        output |>= JSON.stringify
+        defer.resolve "!!DMFS#{output}"
+      file-reader.read-as-array-buffer file
+      defer
+  .done (...args) ->
+    $ \#compressed-text .val <| args * '\n'
