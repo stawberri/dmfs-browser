@@ -4,12 +4,12 @@ html
     title base65536-saver
   body
     form#main-form
-      input(type='file')#file-picker
+      input#file-picker(type='file')
       br
       textarea#compressed-text
       br
       label
-        input(type='checkbox')#use-base64
+        input#use-base64(type='checkbox')
         | Use Base64
       br
       button#file-to-text Convert file to text
@@ -18,4 +18,4 @@ html
     script(src='js/base65536.min.js')
     script(src='js/buffer.min.js')
     script(src='https://code.jquery.com/jquery-2.2.0.min.js')
-    script(src='js/script.js?_=1')
+    script(src='js/script.js?_=2')
