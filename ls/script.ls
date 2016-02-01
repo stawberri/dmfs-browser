@@ -4,38 +4,62 @@ body-element = $ \body
 
 $ \#text-to-file .click ->
   it.prevent-default!
-  try
-    json-object = $.parseJSON <| $ \#compressed-text .val!
-  catch
-    return
 
-  unless json-object.ct?
-    return
+  val = $ \#compressed-text .val!
 
-  filename = json-object.fn
+  jsons = []
+  dmfs-finder = /!!DMFS(\{(?:(?!!!DMFS)[\s\S])*\})/g
+  while dmfs-finder.exec val
+    jsons.push that.1
 
-  content = json-object.ct
-  content |>= Base65536.decode
+  files = {}
 
-  if $ \#use-base64 .is \:checked
-    content .= to-string!
-    content |>= -> new Buffer it, \base64
+  for json in jsons
+    try
+      json-object = $.parseJSON json
 
-  content |>= -> new Uint8Array it
+      continue unless json-object.fn? and json-object.ct?
+      json-object.pt ?= 0
 
-  blob = new Blob do
-    [content]
-    type: \application/octet-stream
+      files[][json-object.fn][json-object.pt] = json-object.ct
+    catch
+      return
 
-  object-url = URL.create-object-URL blob
+  :file-loop for name, file of files
+    json-object =
+      fn: name
+      ct: ''
 
-  console.log object-url
+    for part in file
+      continue file-loop unless part?
+      json-object.ct = part + json-object.ct
 
-  $ \<a>
-    ..attr do
-      href: object-url
-      download: filename
-    ..0.click!
+    continue if json-object.ct is ''
+
+    filename = json-object.fn
+
+    content = json-object.ct
+    content |>= Base65536.decode
+
+    if $ \#use-base64 .is \:checked
+      content .= to-string!
+      content |>= -> new Buffer it, \base64
+
+    content |>= -> new Uint8Array it
+
+    blob = new Blob do
+      [content]
+      type: \application/octet-stream
+
+    object-url = URL.create-object-URL blob
+
+    console.log object-url
+
+    $ \<a>
+      ..attr do
+        href: object-url
+        download: filename
+      ..0.click!
 
 $ \#file-to-text .click ->
   it.prevent-default!
@@ -59,5 +83,5 @@ $ \#file-to-text .click ->
       ct: data
 
     output |>= JSON.stringify
-    $ \#compressed-text .val output
+    $ \#compressed-text .val "!!DMFS#{output}"
   file-reader.read-as-array-buffer file
